@@ -1,0 +1,84 @@
+Please note: there is no memoization in this pseudocode
+
+Position pos is a data structure with Row and Col
+int nPiece is 0 for red and 1 for yellow
+int nDepth should start at 0
+Board brd is a class containing the board and board methods
+int nAlpha starts at negative infinity
+int nBeta starts at positive infinity
+
+To get the next piece to place, make the following call:
+DoSearch pos, nPiece, nDepth, brd, alpha, beta
+
+-------------------------------------------------------------------
+
+DoSearch pos, nPiece, nDepth, brd, nAlpha, nBeta
+
+  // If side won then we return either high or low values.
+  if brd.DidSideWin() return 2000000 for maximizer and -2000000 for minimizer
+
+  // This is neutral for both sides.
+  if brd.IsCatsGame() return 0
+
+  // We will stop once we get to the designated depth and
+  //   simply return the score.
+  if we are at a leaf depth return the score
+
+  // Here we get the list of legal moves for the current board.
+  MoveCount = GetLegalMoves brd.GetBoardData(), MoveList
+
+  // Safety so that we always have a move at depth 0.
+  if nDepth == 0 then set pos.Row = MoveList[0] and pos.Col = MoveList[1]
+
+  // Check to see if this is the maximizer. You could also use
+  //   the depth % 2 == 0 to test for maximizer.
+  if nPiece == nSearchPiece then
+
+    nValue =  negative infinity
+
+    foreach move in move list
+      save the board contents so that we can restore later
+      make the move (call placepiece)
+
+      // Save nValue for later.
+      nTempValue = nValue
+      // Call do search and assign nValue to the max of DoSearch() and nValue,
+      //   remember that we only want the largest value.
+      nValue = max( nValue, DoSearch( pos, nPiece ^ 1, nDepth + 1, brd, nAlpha, nBeta ) );
+      // For nAlpha we get the max of nValue and nAlpha
+      nAlpha = max( nValue, nAlpha );
+
+      // If the previous value was less than this value, then
+      //   we have a better move. If we are at depth 0 then 
+      //   we save row and col to the Position data structure.
+      if nTemp < nValue and nDepth == 0 then
+        pos.Row = MoveList[counter*2]
+        pos.Col = MoveList[counter*2+1]
+
+      Restore the board
+
+      // When beta is less than or equal alpha, we don't need to keep going. 
+      if nBeta <= nAlpha then break
+
+    return nValue
+
+  // Here for the minimizer.
+  else
+
+    nValue =  positive infinity
+
+    foreach move in move list
+      save the board contents so that we can restore later
+      make the move (call placepiece)
+
+      // Call do search and assign nValue to the min of DoSearch() and nValue,
+      //   remember that we only want the smallest value.
+      nValue = min( nValue, DoSearch( pos, nPiece ^ 1, nDepth + 1, brd, nAlpha, nBeta ) );
+      nBeta = min( nValue, nBeta );
+
+      Restore the board
+
+      // When beta is less than or equal alpha, we don't need to keep going. 
+      if nBeta <= nAlpha then break
+
+    return nValue
